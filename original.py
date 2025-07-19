@@ -1,6 +1,3 @@
-# Patched by twojstary
-
-
 import tls_client
 import threading
 import platform
