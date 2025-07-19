@@ -40,7 +40,11 @@ def create_needed_files():
     config_file = "config/config.toml"
     config_dir = "config"
     data_dir = "data"
+    logs_dir = "data/logs"
     tokens_file = "data/tokens.txt"
+    formatter_file = "data/formatter.txt"
+    scraper_file = "data/scraper.txt"
+    access_file = "data/logs/access.log"
 
     try:
         if not os.path.exists(config_dir):
@@ -55,6 +59,21 @@ def create_needed_files():
         
         if not os.path.exists(tokens_file):
             with open(tokens_file, 'w', encoding='utf-8') as f:
+                f.write("")
+
+        if not os.path.exists(formatter_file):
+            with open(formatter_file, 'w', encoding='utf-8') as f:
+                f.write("")
+        
+        if not os.path.exists(scraper_file):
+            with open(scraper_file, 'w', encoding='utf-8') as f:
+                f.write("")
+
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir)
+
+        if not os.path.exists(access_file):
+            with open(access_file, 'w', encoding='utf-8') as f:
                 f.write("")
 
     except Exception as e:
