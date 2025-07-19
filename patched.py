@@ -35,7 +35,6 @@ color_cyan = Fore.CYAN
 color_red = Fore.RED
 
 
-# Patched by twojstary
 def create_needed_files():
     config_file = "config/config.toml"
     config_dir = "config"
@@ -895,13 +894,35 @@ def main():
         invalid_tokens = []
         
         try:
-            with open('tokens.txt', 'r') as f:
-                token = f.readline().strip()
-                if not token:
-                    token = 0
+            with open('data/tokens.txt', 'r') as f:
+                tokens = [token.strip() for token in f.readlines() if token.strip()]
+                if not tokens:
+                    print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} No tokens found in data/tokens.txt!")
+                    input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
+                    continue
+
+            print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Checking {len(tokens)} tokens...")
+            
+            # Sprawdź każdy token
+            for token in tokens:
+                token_checker(token, valid_tokens, locked_tokens, invalid_tokens)
+            
+            print(f"\n{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}SUMMARY{color_reset}] {color_yellow}>>{color_reset}")
+            print(f"Valid tokens: {color_green}{len(valid_tokens)}{color_reset}")
+            print(f"Locked tokens: {color_yellow}{len(locked_tokens)}{color_reset}")
+            print(f"Invalid tokens: {color_red}{len(invalid_tokens)}{color_reset}\n")
+
+            if not valid_tokens:
+                print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} No valid tokens found!")
+                input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
+                continue
+                
+            token = random.choice(valid_tokens)
                     
         except Exception as e:
-            print(e)
+            print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} {str(e)}")
+            input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
+            continue
         
         if logged:
             initialize_ui_with_menu()
@@ -911,33 +932,46 @@ def main():
                 option = int(option)
                 if option == 1:
                     invite = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INVITE{color_reset}] {color_yellow}>> {color_reset} ")
-                    joiner(token, invite)
+                    for token in valid_tokens:
+                        joiner(token, invite)
                 elif option == 2:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    leaver(token, guild_id)
+                    for token in valid_tokens:
+                        leaver(token, guild_id)
                 elif option == 3:
                     message_link = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}MESSAGE LINK{color_reset}] {color_yellow}>> {color_reset} ")
                     emoji = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}EMOJI{color_reset}] {color_yellow}>> {color_reset} ")
-                    add_reaction(token, message_link, emoji)
+                    for token in valid_tokens:
+                        add_reaction(token, message_link, emoji)
                 elif option == 4:
                     message_link = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}MESSAGE LINK{color_reset}] {color_yellow}>> {color_reset} ")
                     emoji = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}EMOJI{color_reset}] {color_yellow}>> {color_reset} ")
-                    remove_reaction(token, message_link, emoji)
+                    for token in valid_tokens:
+                        remove_reaction(token, message_link, emoji)
                 elif option == 5:
                     message_link = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}MESSAGE LINK{color_reset}] {color_yellow}>> {color_reset} ")
-                    button_number = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}BUTTON NUMBER{color_reset}] {color_yellow}>> {color_reset} ")
-                    button_bypass(token, message_link, button_number)
+                    button_number = int(input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}BUTTON NUMBER{color_reset}] {color_yellow}>> {color_reset} "))
+                    for token in valid_tokens:
+                        button_bypass(token, message_link, button_number)
                 elif option == 6:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    guild_checker(token, guild_id)
+                    for token in valid_tokens:
+                        guild_checker(token, guild_id)
                 elif option == 7:
-                    token_checker(token, valid_tokens, locked_tokens, invalid_tokens)
+                    print("\nChecking all tokens again...")
+                    valid_tokens.clear()
+                    locked_tokens.clear()
+                    invalid_tokens.clear()
+                    for token in tokens:
+                        token_checker(token, valid_tokens, locked_tokens, invalid_tokens)
                 elif option == 8:
                     nickname = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}NICKNAME{color_reset}] {color_yellow}>> {color_reset} ")
-                    nick_changer(token, nickname)
+                    for token in valid_tokens:
+                        nick_changer(token, nickname)
                 elif option == 9:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    rules_bypass(token, guild_id)
+                    for token in valid_tokens:
+                        rules_bypass(token, guild_id)
                 elif option == 10:
                     channels_ids = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}CHANNEL IDS{color_reset}] {color_yellow}>> {color_reset} ").split()
                     message = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}MESSAGE{color_reset}] {color_yellow}>> {color_reset} ")
@@ -945,34 +979,47 @@ def main():
                 elif option == 11:
                     token_formatter()
                 elif option == 12:
-                    token_onliner(token)
+                    for token in valid_tokens:
+                        token_onliner(token)
                 elif option == 13:
                     bio = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}BIO{color_reset}] {color_yellow}>> {color_reset} ")
-                    bio_changer(token, bio)
+                    for token in valid_tokens:
+                        bio_changer(token, bio)
                 elif option == 14:
                     channel_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}CHANNEL ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    thread_spammer(token, channel_id)
+                    for token in valid_tokens:
+                        thread_spammer(token, channel_id)
                 elif option == 15:
                     username = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}USERNAME{color_reset}] {color_yellow}>> {color_reset} ")
-                    friend_spammer(token, username)
+                    for token in valid_tokens:
+                        friend_spammer(token, username)
                 elif option == 16:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
                     channel_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}CHANNEL ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    voice_spammer(token, guild_id, channel_id)
+                    for token in valid_tokens:
+                        voice_spammer(token, guild_id, channel_id)
                 elif option == 17:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
                     channel_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}CHANNEL ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    sound_spammer(token, guild_id, channel_id)
+                    for token in valid_tokens:
+                        sound_spammer(token, guild_id, channel_id)
                 elif option == 18:
                     guild_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}GUILD ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    onboarding_bypass(token, guild_id)
+                    for token in valid_tokens:
+                        onboarding_bypass(token, guild_id)
                 elif option == 19:
                     user_id = input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}USER ID{color_reset}] {color_yellow}>> {color_reset} ")
-                    call_spammer(token, user_id)
+                    for token in valid_tokens:
+                        call_spammer(token, user_id)
                 else:
                     print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} Nieprawidłowa opcja!")
+                    input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
             except ValueError:
                 print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} Proszę podać numer opcji!")
+                input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
+            except Exception as e:
+                print(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}ERROR{color_reset}] {color_yellow}>> {color_reset} {str(e)}")
+                input(f"{color_magenta}{datetime.now().strftime('%H:%M:%S')}{color_reset} [{color_pink}INFO{color_reset}] {color_yellow}>> {color_reset} Press ENTER to continue...")
 
 if __name__ == "__main__":
     main()
